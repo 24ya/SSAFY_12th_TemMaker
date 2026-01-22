@@ -5,6 +5,7 @@ on:
   schedule:
   # - cron: '30 22 * * 0-4' # UTC : 일 ~ 목 오후 23시 00분 => KST : 월 ~ 금 오전 07시 30분
   - cron: '30 23 * * 0-4'
+  workflow_dispatch:
 
 jobs:
   deploy:
