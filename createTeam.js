@@ -46,17 +46,31 @@ export function createTeams(array, teamSize) {
   return teams;
 }
 
+// 7반 버전 함수 수정
 export function createTeamsV2(array, weights, teamSize) {
   let teams = [];
   let usedMembers = new Set();
 
-  while (usedMembers.size < array.length) {
+  const totalMembers = array.length;
+  // 전체 팀 개수 (26명 / 4 = 6팀)
+  const numberOfTeams = Math.floor(totalMembers / teamSize);
+  // 남는 인원 (26 % 4 = 2명) -> 앞쪽 조에 한 명씩 분배
+  const remainder = totalMembers % teamSize;
+
+  // 정해진 팀 개수만큼 반복
+  for (let i = 0; i < numberOfTeams; i++) {
     let team = [];
+
+    // 현재 팀의 정원 계산:
+    // i(현재 팀 번호)가 remainder(남는 인원 수)보다 작으면 1명 추가(5명), 아니면 기본(4명)
+    const currentLimit = i < remainder ? teamSize + 1 : teamSize;
+
     let availableMembers = shuffle(
       array.filter((member) => !usedMembers.has(member))
     );
 
-    while (team.length < teamSize && availableMembers.length > 0) {
+    // 현재 팀 정원(currentLimit)이 찰 때까지 멤버 추가
+    while (team.length < currentLimit && availableMembers.length > 0) {
       availableMembers.sort((a, b) => {
         let weightA = team.reduce((sum, member) => sum + weights[member][a], 0);
         let weightB = team.reduce((sum, member) => sum + weights[member][b], 0);
@@ -70,7 +84,7 @@ export function createTeamsV2(array, weights, teamSize) {
 
     teams.push(team);
 
-    // 가중치 증가
+    // 가중치 증가 (기존 로직 유지)
     team.forEach((member) => {
       team.forEach((other) => {
         if (member !== other) {
@@ -95,9 +109,10 @@ export function teamsToString(teams) {
   const { month, date } = getToday();
   const title = `### :party_blob: :rice: ${month}월 ${
     date + 1
-  }일 밥 같이 먹어요 :rice: :party_blob: :cat_feed:`; // UTC 23:30 => KST 08:30 하루 차이가 나서 date + 1
+  }일 밥 같이 먹어요 :rice: :party_blob: :cat_feed:`; 
+  
   const teamList = teams
-    .map((team, index) => `**${index + 1}조**    ➡    ${team.join("\t")}`)
+    .map((team, index) => `**${index + 1}조 (${team.length}명)** ➡ ${team.join("\t")}`)
     .join("\n");
 
   const message = `${title}\n${teamList}`;
